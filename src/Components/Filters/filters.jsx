@@ -1,4 +1,5 @@
 import React from "react";
+import { useDispatch } from "react-redux";
 import './filters.css';
 import { TextField } from "@material-ui/core";
 import { Button } from "@material-ui/core";
@@ -8,6 +9,8 @@ import { renderToDoList } from "../../Redux/Actions/actions";
 // import { handleSubmitToDo } from '../../Redux/Actions/actions';
 
 export function Filters() {
+    const dispatch = useDispatch();
+
     return (
         <div className='filters-styles'>
             <h3 style={{ fontSize: '1.2rem' }}>Your ToDo</h3>
@@ -18,7 +21,7 @@ export function Filters() {
                     type={'text'}
                     label='Enter your ToDo' 
                     variant='outlined' 
-                    size='small' 
+                    size='small'
                 />
                 <Button 
                     id='add-todo-btn-id'
@@ -32,7 +35,7 @@ export function Filters() {
                 </Button>
             </form>
 
-            <ul id='todo-list-id' onChange={() => renderToDoList()}>
+            <ul id='todo-list-id' onChange={() => dispatch(renderToDoList())}>
                 <li id='todo-id'></li>
             </ul>
         </div>

@@ -1,18 +1,21 @@
 import { addReducer } from '../Reducers/addToDo';
 import { createStore } from 'redux';
 
-
 export const store = createStore(
     addReducer,
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
+
+// const handleFinishToDo = () => {
+//     document.getElementById('todo-id').style.textDecoration = 'line-through';
+// }
 
 export const renderToDoList = (toDoList) => {
     if (!Array.isArray(toDoList) || toDoList.length === 0) {
         return;
     }
 
-    const ulElement = document.queryAllSelector('#todo-list-id');
+    const ulElement = document.querySelector('#todo-list-id');
     if (!ulElement) {
         return;
     }
@@ -20,14 +23,21 @@ export const renderToDoList = (toDoList) => {
     ulElement.innerHTML = '';
 
     for (const toDo of toDoList) {
-        const liElement = document.querySelector('#todo-id');
+        const liElement = document.createElement('li');
+        liElement.id = 'todo-id';
+        Object.assign(liElement.style, {
+           marginTop: '10px' 
+        });
+        // liElement.onclick = handleFinishToDo();
         liElement.textContent = toDo;
+
+        ulElement.appendChild(liElement);
     }
 }
 
 const initialToDoList = store.getState();
-renderToDoList(initialToDoList);
 console.log(initialToDoList);
+renderToDoList(initialToDoList);
 
 export const toDoFormElement = document.querySelector('#form-todo-id');
 if (toDoFormElement) {

@@ -1,5 +1,4 @@
 const initialState = JSON.parse(localStorage.getItem('todo_list')) || [];
-// const initialState = ['Learn React'];
 
 console.log(initialState);
 
@@ -15,5 +14,3 @@ export const addReducer = (state = initialState, action) => {
         }
     }
 }
-
-console.log(addReducer.value);

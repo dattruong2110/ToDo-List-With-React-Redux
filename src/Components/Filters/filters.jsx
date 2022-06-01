@@ -1,11 +1,10 @@
 import React from "react";
-import { useDispatch } from "react-redux";
 import './filters.css';
-import { TextField } from "@material-ui/core";
-import { Button } from "@material-ui/core";
+import { useDispatch } from "react-redux";
+import { TextField, Button } from "@material-ui/core";
 import AddIcon from '@mui/icons-material/Add';
-import { renderToDoList } from "../../Redux/Actions/actions";
 import { store } from "../../Redux/Actions/actions";
+import { renderToDoList } from "../../Redux/Actions/actions";
 
 export function Filters() {
     const dispatch = useDispatch();

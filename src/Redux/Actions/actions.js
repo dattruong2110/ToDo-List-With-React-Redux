@@ -1,5 +1,5 @@
-import { addReducer } from '../Reducers/addToDo';
 import { createStore } from 'redux';
+import { addReducer } from '../Reducers/addToDo';
 
 export const store = createStore(
     addReducer,
@@ -26,14 +26,15 @@ export const renderToDoList = (toDoList) => {
         const liElement = document.createElement('li');
         liElement.id = 'todo-id';
         Object.assign(liElement.style, {
-           marginTop: '10px' 
+           marginTop: '10px',
+           marginLeft: '15px', 
         });
         // liElement.onclick = handleFinishToDo();
         liElement.textContent = toDo;
 
         ulElement.appendChild(liElement);
     }
-}
+};
 
 const initialToDoList = store.getState();
 console.log(initialToDoList);

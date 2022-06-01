@@ -12,5 +12,5 @@ export const addReducer = (state = initialState, action) => {
         default: {
             return state;
         }
-    }
-}
+    };
+};

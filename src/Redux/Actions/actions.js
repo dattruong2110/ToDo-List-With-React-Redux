@@ -3,6 +3,7 @@ import { addReducer } from '../Reducers/addToDo';
 
 export const store = createStore(
     addReducer,
+    JSON.parse(localStorage.getItem('todo_list')) || [],
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
 

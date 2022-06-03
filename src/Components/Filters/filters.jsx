@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import './filters.css';
 import { useDispatch } from "react-redux";
 import { TextField, Button } from "@material-ui/core";
@@ -8,6 +8,10 @@ import { renderToDoList } from "../../Redux/Actions/actions";
 
 export function Filters() {
     const dispatch = useDispatch();
+    
+    useEffect(() => {
+        renderToDoList(store.getState());
+    }, []);
 
     const handleOnSubmit = (e) => {
         e.preventDefault();

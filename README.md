@@ -71,120 +71,107 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ### create component Todo -> create file todo.jsx
 import React, { useState } from 'react';
-import { store } from '../../Redux/Actions/actions'
+import { store } from '../../Redux/Actions/actions';
 
 export const Todo = (props) => {
-    const [status, setStatus] = useState('todo');
+    // const [status, setStatus] = useState('todo');
 
-
+    const { status } = props;
 
     const handleOnclick = (e) => {
         e.preventDefault();
 
         // update local  state
+        let newStatus = '';
         if (status === 'todo') {
-            setStatus('completed');
+            newStatus = 'completed';
         } else {
-            setStatus('todo');
+            newStatus = 'todo';
         }
 
         store.dispatch({
-            type: 'UPDATE_TODO',    
+            type: 'UPDATE_TODO',
             payload: {
                 id: props.id,
-                status: status
+                status: newStatus,
             }
         })
     }
 
     return (
-        <>
-            <li onClick={handleOnclick}>{props.content}</li>
-        </>
+        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+            <li
+                onClick={handleOnclick}
+                style={{
+                    fontSize: '1.2rem',
+                    lineHeight: '2rem',
+                    color: '#333',
+                    textDecorationLine: props.status==='completed' ? 'line-through' : 'none'
+                }}
+            >
+                {props.content}
+            </li>
+        </div>
     )
 }
 
 ### create component TodoList -> create file todoList.jsx
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Todo } from '../Todo/todo'
-import { store } from '../../Redux/Actions/actions';
 import { useSelector } from 'react-redux';
-import { connect } from 'react-redux';
 
-const todoSelector = (state) => state;
+const todoSelector = (state) => {
+    console.log('Current state:', state);
+    return state;
+}
 
 export const TodoList = () => {
-    const [itemList, setItemList] = useState([]);
-
     const todoFromSelector = useSelector(todoSelector);
-
-    useEffect(() => {
-        const listFromStore = store.getState();
-        console.log('List from store:', listFromStore)
-        setItemList(listFromStore)
-    }, [todoFromSelector])
 
     return (
         <div>
-            {itemList.map(todo => {
-               return (<Todo key={todo.id} id={todo.id} content={todo.content} status={todo.status}>
-                
+            {todoFromSelector.map(todo => {
+                return (<Todo
+                            key={todo.id}
+                            id={todo.id}
+                            content={todo.content}
+                            status={todo.status}
+                        >
                 </Todo>)
             })}
         </div>
-        
     )
 }
 
-const mapStateToProps = function(state) {
-  return {
-    ...state
-  }
-}
-
-// export default connect(mapStateToProps)(TodoList);
-
 ### modify filters.jsx
-import React, { useEffect, useState } from "react";
+import React from "react";
 import './filters.css';
-import { useDispatch } from "react-redux";
 import { TextField, Button } from "@material-ui/core";
 import AddIcon from '@mui/icons-material/Add';
 import { v4 } from 'uuid';
 import { store } from "../../Redux/Actions/actions";
-import { renderToDoList } from "../../Redux/Actions/actions";
 import { TodoList } from "../TodoList/todoList";
-import { toDoFormElement } from "../../Redux/Actions/actions";
 
 
 export function Filters() {
-    const dispatch = useDispatch();
-
-    const [todoList, setTodoList] = useState([]);
-
-    useEffect(() => {
-        renderToDoList(store.getState());
-    }, []);
-    
-    const [value, setValue] = useState(
-        JSON.parse(localStorage.getItem('todo_list')) || []
-    );
 
     const handleOnSubmit = (e) => {
         e.preventDefault();
+
+        const value = document.getElementById('text-todo-id')?.value;
         if (!value) {
             return;
         }
 
         console.log('Submit', value);
-        setValue(store.dispatch({
+        store.dispatch({
             type: 'ADD_TODO',
             payload: { 
                     id: v4(),
-                    content: document.getElementById('text-todo-id').value,
+                    content: value,
                     status: 'todo'
                  }
-        }));
+        });
 
         document.getElementById('form-todo-id').reset();
     };
@@ -227,7 +214,6 @@ export function Filters() {
 ### modify actions.js
 import { createStore } from 'redux';
 import { todoReducer } from '../Reducers/todoReducer';
-import { v4 } from 'uuid';
 
 export const store = createStore(
     todoReducer,
@@ -235,92 +221,21 @@ export const store = createStore(
     window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
 
-// const handleFinishToDo = (element) => {
-//     element.style.textDecoration = 'line-through';
-
-//     const currentStatus = element.getAttribute('data-status');
-    
-//     store.dispatch({
-//         type: 'UPDATE_TODO',
-//         payload: { id: element.id, status: currentStatus === 'completed' ? 'todo' : 'completed'},
-//     });
-// }
-
-export const renderToDoList = (toDoList) => {
-    if (!Array.isArray(toDoList) || toDoList.length === 0) {
-        return;
-    }
-
-    const ulElement = document.querySelector('#todo-list-id');
-    if (!ulElement) {
-        return;
-    }
-
-    ulElement.innerHTML = '';
-
-    for (const toDo of toDoList) {
-        const liElement = document.createElement('li');
-        // liElement.id = v4();
-        Object.assign(liElement.style, {
-            marginTop: '10px',
-            marginLeft: '15px', 
-            color: '#fff',
-            cursor: 'pointer'
-        });
-        // liElement.onclick = handleFinishToDo();
-        liElement.textContent = toDo;
-
-        ulElement.appendChild(liElement);
-    }
-};
-
-const initialToDoList = store.getState();
-console.log(initialToDoList);
-renderToDoList(initialToDoList);
-
-export const toDoFormElement = document.querySelector('#form-todo-id');
-if (toDoFormElement) {
-    const handleSubmitToDo = (e) => {
-        e.preventDefault();
-        const toDoTextElement = toDoFormElement.querySelector('#text-todo-id');
-        if (!toDoTextElement) {
-            return;
-        }
-
-        console.log('Submit', toDoTextElement.value);
-        const action = () => {
-            return {
-                type: 'ADD_TODO',
-                payload: { 
-                    id: v4(),
-                    content: toDoTextElement.value,
-                    status: 'todo'
-                 }
-            }
-        };
-        store.dispatch(action);
-
-        toDoFormElement.reset();
-    };
-    toDoFormElement.addEventListener('submit', handleSubmitToDo);
-}
-
-store.subscribe (() => {
-    console.log('State Update: ', store.getState());
-    const newToDoList = store.getState();
-    localStorage.setItem('todo_list', JSON.stringify(newToDoList));
-    
-    renderToDoList(newToDoList);
-});
-
 ### modify file addReducer.js -> todoReducer.js
 export const initialState = JSON.parse(localStorage.getItem('todo_list')) || [];
+
+const saveStateToStorage = (state) => {
+    localStorage.setItem('todo_list', JSON.stringify(state));
+}
 
 export const todoReducer = (state = initialState, action) => {
     switch (action.type) {
         case 'ADD_TODO': {
             const newList = [...state];
             newList.push(action.payload);
+
+            saveStateToStorage(newList);
+
             return newList;
         }
         case 'UPDATE_TODO': {
@@ -332,6 +247,8 @@ export const todoReducer = (state = initialState, action) => {
             todoToUpdate.status = action.payload.status;
 
             state.splice(state.indexOf(todoToUpdate), 1, { ...todoToUpdate });
+
+            saveStateToStorage(state);
             
             return [...state];
         }
@@ -348,22 +265,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Provider } from 'react-redux';
-import { renderToDoList } from './Redux/Actions/actions';
-import { todoReducer } from './Redux/Reducers/todoReducer';
-import { createStore } from 'redux';
-
-export const store = createStore(
-  todoReducer,
-  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-);
-
-store.subscribe (() => {
-  console.log('State Update: ', store.getState());
-  const newToDoList = store.getState();
-  renderToDoList(newToDoList);
-
-  localStorage.setItem('todo_list', JSON.stringify(newToDoList));
-});
+import { store } from './Redux/Actions/actions';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -376,3 +278,37 @@ root.render(
 
 reportWebVitals();
  
+ ### modify App.js
+ import React from "react";
+import "./App.css";
+import { Card } from "@material-ui/core";
+import { Filters } from "./Components/Filters/filters";
+
+function App() {
+  return (
+    <div className='App'>
+      <Card 
+        className='box-shadow box-shadow-hover' 
+        style={{
+          marginTop: '30px',
+          height: '600px',
+          background: 'linear-gradient(to bottom right, #cc93e2, #ffffffee)'
+        }}
+      >
+        <h1 
+          style={{ 
+            marginTop: '10px', 
+            fontSize: '1.8rem', 
+            textAlign: 'center', 
+            color: '#fff' 
+          }}
+        >
+          TODO APP
+        </h1>
+        <Filters />
+      </Card>
+    </div>
+  );
+}
+
+export default App;

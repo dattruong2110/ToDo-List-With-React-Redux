@@ -1,13 +1,14 @@
 import { StorageService } from './../localStorage/localStorage.service';
 import { ITask } from './../model/task';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
+import { DateRange, MatCalendarCellClassFunction } from '@angular/material/datepicker';
 
 const todoListStorageKey = 'Todo_List';
 
 const defaultTodoList = [
-  { tasks: undefined, inprogress: undefined, done: undefined }
+  { description: 'News task', start: '10/21/2022', end: '10/22/2022', done: 'false' }
 ]
 
 @Component({
@@ -17,35 +18,49 @@ const defaultTodoList = [
 })
 
 export class TodoComponent implements OnInit {
+  @Input() startDate = new Date();
+  @Input() endDate = new Date();
+
+  range = new FormGroup({
+    start: new FormControl<Date | null>(null),
+    end: new FormControl<Date | null>(null),
+  });
 
   todoForm!: FormGroup;
   tasks: ITask[] = [];
+  start: ITask[] = [];
+  end: ITask[] = [];
   inprogress: ITask[] = [];
   done: ITask[] = [];
   updateIndex!: any;
   isEditEnabled: boolean = false;
 
   constructor(private fb: FormBuilder, private storageService: StorageService) {
-    if (this.tasks.length > 0) {
-      this.tasks = storageService.getData(todoListStorageKey);
-    } else {
-      return;
-    }
+    this.tasks = storageService.getData(todoListStorageKey) || defaultTodoList;
+    // if (this.tasks.length > 0) {
+    //   this.tasks = storageService.getData(todoListStorageKey);
+    // } else {
+    //   return;
+    // }
   }
 
   ngOnInit(): void {
     this.todoForm = this.fb.group({
-      item: ['', Validators.required]
+      item: ['', Validators.required],
+      start: ['', Validators.required],
+      end: ['', Validators.required]
     });
   };
 
   saveList(): void {
     this.storageService.setData(todoListStorageKey, this.tasks);
-  }
+  };
 
   addTask() {
     this.tasks.push({
       description: this.todoForm.value.item,
+      start: this.todoForm.value.start,
+      end: this.todoForm.value.end,
       done: false,
     });
     this.saveList();
@@ -54,6 +69,8 @@ export class TodoComponent implements OnInit {
 
   onEdit(item: ITask, idx: number) {
     this.todoForm.controls['item'].setValue(item.description);
+    this.todoForm.controls['start'].setValue(item.start);
+    this.todoForm.controls['end'].setValue(item.end);
     this.updateIndex = idx;
     this.isEditEnabled = true;
     this.saveList();
@@ -61,6 +78,8 @@ export class TodoComponent implements OnInit {
 
   updateTask() {
     this.tasks[this.updateIndex].description = this.todoForm.value.item;
+    this.tasks[this.updateIndex].start = this.todoForm.value.start;
+    this.tasks[this.updateIndex].end = this.todoForm.value.end;
     this.tasks[this.updateIndex].done = false;
     this.todoForm.reset();
     this.updateIndex = undefined;
